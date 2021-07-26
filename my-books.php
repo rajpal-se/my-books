@@ -59,3 +59,36 @@ function book_list_handler(){
 function add_new_book_handler(){
     require_once MY_BOOK_PLUGIN_DIR_PATH . 'views/book-add.php';
 }
+
+function get_my_book_table_name(){
+    return $GLOBALS['wpdb']->prefix . 'my_book';
+}
+
+
+register_activation_hook( __FILE__, 'my_book_activation_handler');
+
+function my_book_activation_handler(){
+    // Create Table
+    global $wpdb;
+    $create_table_sql = '
+            CREATE TABLE `'. $wpdb->dbname .'`.`'. get_my_book_table_name() .'` (
+                `id` INT NOT NULL AUTO_INCREMENT ,
+                `name` VARCHAR(255) NULL ,
+                `author` VARCHAR(255) NULL ,
+                `about` TEXT NULL ,
+                `boook_image` TEXT NULL ,
+                `created_at` TIMESTAMP NOT NULL,
+                PRIMARY KEY (`id`)
+            ) ENGINE = InnoDB;
+    ';
+    require_once ABSPATH . 'wp-admin/includes/upgrade.php';
+    dbDelta($create_table_sql);
+}
+
+register_uninstall_hook( __FILE__, 'my_book_uninstall_handler');
+
+function my_book_uninstall_handler(){
+    // Drop Table
+    global $wpdb;
+    $wpdb->query('DROP TABLE IF EXISTS '. get_my_book_table_name() );
+}
