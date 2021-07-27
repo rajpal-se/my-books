@@ -2,10 +2,10 @@
     <div class="row">
         <div><br></div>
         <div class="alert alert-info">
-            <h5>Book Add Page</h5>
+            <h5>Book Edit Page</h5>
         </div>
         <div class="card p-0">
-            <div class="card-header bg-primary text-white">Add Book</div>
+            <div class="card-header bg-primary text-white">Update Book</div>
             <div class="card-body">
                 <form>
                     <div class="row mb-3">
@@ -35,7 +35,7 @@
                     
                     <div class="row mb-3">
                         <div class="offset-sm-2">
-                            <button type="submit" class="btn btn-primary">Submit</button>
+                            <button type="submit" class="btn btn-primary">Update</button>
                         </div>
                     </div>
                      

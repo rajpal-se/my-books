@@ -26,6 +26,9 @@ add_action('admin_enqueue_scripts', function(){
         wp_enqueue_script( my_book_prefix( $name ) , MY_BOOK_PLUGIN_URL.$url, '', false, true);
     }
 
+    // jQuery
+    wp_enqueue_script('jquery');
+
     // BootStrap
     add_style('bootstrap', 'assets/libs/bootstrap-5.0.2-dist/css/bootstrap.min.css');
     add_script('bootstrap', 'assets/libs/bootstrap-5.0.2-dist/js/bootstrap.min.js');
@@ -48,8 +51,9 @@ add_action('admin_enqueue_scripts', function(){
 
 add_action('admin_menu', function(){
     add_menu_page('My Book', 'My Book', 'manage_options', 'book-list', 'book_list_handler', 'dashicons-book-alt', 30);
-    add_submenu_page('book-list', 'Book List', 'Book List', 'manage_options', 'book-list', 'book_list_handler', 'dashicons-book-alt');
-    add_submenu_page('book-list', 'Add New Book', 'Add New', 'manage_options', 'add-new-book', 'add_new_book_handler', 'dashicons-book-alt');
+    add_submenu_page('book-list', 'Book List', 'Book List', 'manage_options', 'book-list', 'book_list_handler');
+    add_submenu_page('book-list', 'Add New Book', 'Add New', 'manage_options', 'add-new-book', 'add_new_book_handler');
+    add_submenu_page('book-list', 'Edit Book', '', 'manage_options', 'edit-book', 'edit_book_handler');
 });
 
 function book_list_handler(){
@@ -58,6 +62,10 @@ function book_list_handler(){
 
 function add_new_book_handler(){
     require_once MY_BOOK_PLUGIN_DIR_PATH . 'views/book-add.php';
+}
+
+function edit_book_handler(){
+    require_once MY_BOOK_PLUGIN_DIR_PATH . 'views/book-edit.php';
 }
 
 function get_my_book_table_name(){
