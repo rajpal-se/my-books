@@ -15,43 +15,40 @@ if(isset($_GET['book-id'])){
             <div class="row g-0">
                 <div><br></div>
                 <div class="alert alert-info">
-                    <h5>Book Edit Page</h5>
+                    <h5>Book Details</h5>
                 </div>
                 <div class="card p-0 col-md-8 cold-lg-6 m-md-auto">
-                    <div class="card-header bg-primary text-white">Update Book</div>
+                    <div class="card-header bg-primary text-white">Book Information</div>
                     <div class="card-body">
                         <form class="book-edit" data-book-id='<?php echo $_GET['book-id']; ?>'>
                             <div class="row mb-3">
                                 <label for="name" class="col-lg-4 col-form-label">Name</label>
                                 <div class="col-lg-8">
-                                    <input type="text" required class="form-control" id="name" name="name" value="<?= $results->name ?>">
+                                    <input type="text" required class="form-control" id="name" name="name" value="<?= $results->name ?>" readonly>
                                 </div>
                             </div>
                             <div class="row mb-3">
                                 <label for="author" class="col-lg-4 col-form-label">Author</label>
                                 <div class="col-lg-8">
-                                    <input type="text" required class="form-control" id="author" name="author" value="<?= $results->author ?>">
+                                    <input type="text" required class="form-control" id="author" name="author" value="<?= $results->author ?>" readonly>
                                 </div>
                             </div>
                             <div class="row mb-3">
                                 <label for="about" class="col-lg-4 col-form-label">About</label>
                                 <div class="col-lg-8">
-                                    <textarea class="form-control" required id="about" name="about" rows="5"><?= $results->about ?></textarea>
+                                    <textarea class="form-control" required id="about" name="about" rows="5" readonly><?= $results->about ?></textarea>
                                 </div>
                             </div>
                             <div class="row mb-3">
-                                <label for="image" class="col-lg-4 col-form-label">Upload Image</label>
+                                <label class="col-lg-4 col-form-label">Book Image</label>
                                 <div class="col-lg-8 d-flex">
-                                    <input type="button" class="form-control btn-primary w-auto px-3 align-self-start" id="image" value="Upload">
                                     <img src="<?= $results->book_image; ?>" data-url="<?= $results->book_image ?>" class="ms-3" style="max-height: 100px; max-width: 100px;">
-                                    <input type="hidden" name="image" value="<?= $results->book_image ?>">
                                 </div>
                             </div>
-                            
                             <div class="row mb-3">
-                                <div class="offset-sm-4">
-                                    <br>
-                                    <input type="submit" class="btn btn-primary" value="Update">
+                                <label for="created_at" class="col-lg-4 col-form-label">Created At</label>
+                                <div class="col-lg-8">
+                                    <input type="text" required class="form-control" id="created_at" name="author" value="<?= $results->created_at ?>" readonly>
                                 </div>
                             </div>
                             

@@ -1,0 +1,13 @@
+/* jQuery Validate */
+.my-book form label.error{
+    color: red;
+    font-weight: bold;
+}
+/* jQuery DataTables */
+div.dataTables_length#my-book_length select{
+    min-width: 80px;
+}
+/* jQuery NotifyBar */
+.jquery-notify-bar {
+    z-index: 100000;
+}
