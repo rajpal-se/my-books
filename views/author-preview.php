@@ -8,11 +8,6 @@ if(isset($_GET['author-id'])){
     );
 
     if($results){
-        $id = $results->id;
-        $name = htmlspecialchars(stripslashes($results->name));
-        $fb_link = htmlspecialchars(stripslashes($results->fb_link));
-        $about = htmlspecialchars(stripslashes($results->about));
-        
         ?>
         <div class="container my-book">
             <div class="row g-0">
@@ -23,32 +18,32 @@ if(isset($_GET['author-id'])){
                 <div class="card p-0 col-md-8 cold-lg-6 m-md-auto">
                     <div class="card-header bg-primary text-white">Update Author Details</div>
                     <div class="card-body">
-                        <form class="author-edit" data-author-id='<?= $id ?>'>
+                        <form class="author-preview">
                             <div class="row mb-3">
                                 <label for="name" class="col-lg-4 col-form-label">Name</label>
                                 <div class="col-lg-8">
-                                    <input type="text" required class="form-control" id="name" name="name" value="<?= $name ?>">
+                                    <input type="text" readonly class="form-control" id="name" name="name" value="<?= $results->name ?>">
                                 </div>
                             </div>
                             <div class="row mb-3">
                                 <label for="fb_link" class="col-lg-4 col-form-label">Facebook Link</label>
                                 <div class="col-lg-8">
-                                    <input type="text" class="form-control" id="fb_link" name="fb_link" value="<?= $fb_link ?>">
+                                    <input type="text" readonly class="form-control" id="fb_link" name="fb_link" value="<?= $results->fb_link ?>">
                                 </div>
                             </div>
                             <div class="row mb-3">
                                 <label for="about" class="col-lg-4 col-form-label">About</label>
                                 <div class="col-lg-8">
-                                    <textarea class="form-control" id="about" name="about" rows="5"><?= $about ?></textarea>
+                                    <div class="form-control" readonly id="about" name="about" style="min-height: 38px;"><?= $results->about ?></div>
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <label for="created_at" class="col-lg-4 col-form-label">Created At</label>
+                                <div class="col-lg-8">
+                                    <input type="text" readonly class="form-control" id="created_at" name="created_at" value="<?= $results->created_at ?>">
                                 </div>
                             </div>
                             
-                            <div class="row mb-3">
-                                <div class="offset-sm-4">
-                                    <br>
-                                    <input type="submit" class="btn btn-primary" value="Update">
-                                </div>
-                            </div>
                             
                         </form>
                     </div>

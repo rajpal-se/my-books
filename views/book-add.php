@@ -18,7 +18,30 @@
                     <div class="row mb-3">
                         <label for="author" class="col-lg-4 col-form-label">Author</label>
                         <div class="col-lg-8">
-                            <input type="text" required class="form-control" id="author" name="author">
+                            <?php
+                                global $wpdb;
+                                $table = $wpdb->prefix . 'book_authors';
+                                $authors = $wpdb->get_results(
+                                    $wpdb->prepare("SELECT id, name FROM {$table} ORDER BY name", '')
+                                );
+
+                                if(count($authors) > 0){
+                                    ?>
+                                        <select required class="form-control" id="author" name="author_id">
+                                            <option value="">Select Author</option>
+                                            <?php
+                                                foreach($authors as $author){
+                                                    echo "<option value='{$author->id}'>{$author->name}</option>";
+                                                }
+                                            ?>
+                                        </select>
+                                    <?php
+                                }
+                                else{
+                                    $link = admin_url('admin.php?page=add-book-author');
+                                    echo "No Author Exists. <a href='{$link}'>Add New Author</a>";
+                                }
+                            ?>
                         </div>
                     </div>
                     <div class="row mb-3">

@@ -7,11 +7,11 @@
         <div class="card p-0 col-md-8 cold-lg-6 m-md-auto">
             <div class="card-header bg-primary text-white">Add Author</div>
             <div class="card-body">
-                <form>
+                <form class="author-add">
                     <div class="row mb-3">
                         <label for="name" class="col-lg-4 col-form-label">Name</label>
                         <div class="col-lg-8">
-                            <input type="text" class="form-control" id="name" name="name">
+                            <input type="text" required class="form-control" id="name" name="name">
                         </div>
                     </div>
                     <div class="row mb-3">

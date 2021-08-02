@@ -27,7 +27,10 @@ add_action('admin_enqueue_scripts', function(){
     }
 
     if(isset($_GET['page'])){
-        $pages = ['book-list', 'add-new-book', 'edit-book', 'view-book', 'add-book-user', 'edit-book-user', 'list-book-users', 'add-book-author', 'edit-book-author', 'list-book-authors', 'book-users-enrollment'];
+        $pages =['book-list', 'add-new-book', 'edit-book', 'view-book'];
+        array_push($pages, 'add-book-user', 'edit-book-user', 'list-book-users');
+        array_push($pages, 'add-book-author', 'edit-book-author', 'list-book-authors', 'preview-book-author');
+        array_push($pages, 'book-users-enrollment');
         if(in_array($_GET['page'], $pages)){
             // jQuery
             wp_enqueue_script('jquery');
@@ -71,6 +74,7 @@ add_action('admin_menu', function(){
     add_submenu_page('book-list', 'All Authors', 'All Authors', 'manage_options', 'list-book-authors', 'list_author_users_handler');
     add_submenu_page('book-list', 'Add New Author', 'Add Author', 'manage_options', 'add-book-author', 'add_book_author_handler');
     add_submenu_page(null, 'Edit Author', null, 'manage_options', 'edit-book-author', 'edit_book_author_handler');
+    add_submenu_page(null, 'Preview Author', null, 'manage_options', 'preview-book-author', 'preview_book_author_handler');
     
     add_submenu_page('book-list', 'Users Enrollment', 'Users Enrollment', 'manage_options', 'book-users-enrollment', 'users_enrollment_handler');
     
@@ -88,6 +92,7 @@ function edit_book_user_handler() { require_once MY_BOOK_PLUGIN_DIR_PATH . 'view
 function add_book_author_handler() { require_once MY_BOOK_PLUGIN_DIR_PATH . 'views/author-add.php'; }
 function list_author_users_handler() { require_once MY_BOOK_PLUGIN_DIR_PATH . 'views/author-list.php'; }
 function edit_book_author_handler() { require_once MY_BOOK_PLUGIN_DIR_PATH . 'views/author-edit.php'; }
+function preview_book_author_handler() { require_once MY_BOOK_PLUGIN_DIR_PATH . 'views/author-preview.php'; }
 
 function users_enrollment_handler() { require_once MY_BOOK_PLUGIN_DIR_PATH . 'views/list-enrollments.php'; }
 
@@ -109,7 +114,7 @@ function get_my_book_table_info($names = false, $prefixed = false){
             CREATE TABLE `'. $wpdb->dbname .'`.`'. $wpdb->prefix . $table .'` (
                 `id` INT NOT NULL AUTO_INCREMENT ,
                 `name` VARCHAR(255) NULL ,
-                `author` VARCHAR(255) NULL ,
+                `author_id` INT NOT NULL ,
                 `about` TEXT NULL ,
                 `book_image` TEXT NULL ,
                 `created_at` TIMESTAMP NOT NULL,
@@ -134,7 +139,8 @@ function get_my_book_table_info($names = false, $prefixed = false){
             CREATE TABLE `'. $wpdb->dbname .'`.`'. $wpdb->prefix . $table .'` (
                 `id` INT NOT NULL AUTO_INCREMENT ,
                 `name` VARCHAR(100) NOT NULL ,
-                `fb_link` VARCHAR(100) NOT NULL ,
+                `fb_link` VARCHAR(100) NULL ,
+                `about` TEXT NULL ,
                 `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ,
                 PRIMARY KEY (`id`)
             ) ENGINE = InnoDB;

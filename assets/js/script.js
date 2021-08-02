@@ -28,7 +28,7 @@ jQuery(document).ready(function() {
                 let data = 'action='+action+'&sub_action='+sub_action+'&'+form.serialize();
                 jQuery.post(mb_ajaxurl, data, function(response){
                     if(console_log) console.log(response);
-                    if(response.status = 1){
+                    if(response.status == 1){
                         jQuery.notifyBar({
                             html: response.message,
                             delay: 1000,
@@ -54,14 +54,14 @@ jQuery(document).ready(function() {
                 data += form.serialize();
                 jQuery.post(mb_ajaxurl, data, function(response){
                     if(console_log) console.log(response);
-                    if(response.status = 1){
+                    if(response.status == 1){
                         jQuery.notifyBar({
                             html: response.message,
                             delay: 1000,
                             cssClass: 'success',
                             animationSpeed: "normal",
                             onHide: function(){
-                                window.location.reload();
+                                window.location.href = response.data.redirect;
                             }
                         });
                     }
@@ -78,7 +78,7 @@ jQuery(document).ready(function() {
                 let data = 'action='+action+'&sub_action='+sub_action+'&'+'&book_id='+book_id+'&';
                 jQuery.post(mb_ajaxurl, data, function(response){
                     if(console_log) console.log(response);
-                    if(response.status = 1){
+                    if(response.status == 1){
                         window.location.reload();
                     }
                 });
@@ -93,8 +93,68 @@ jQuery(document).ready(function() {
     
     // Authors
     (function(){
-
+        jQuery('.my-book form.author-add').validate({
+            submitHandler: function(e){
+                let form = jQuery('.my-book form.author-add');
+                let action = 'my_book';
+                let sub_action = 'add_author';
+                let data = 'action='+action+'&sub_action='+sub_action+'&'+form.serialize();
+                jQuery.post(mb_ajaxurl, data, function(response){
+                    if(console_log) console.log(response);
+                    if(response.status == 1){
+                        jQuery.notifyBar({
+                            html: response.message,
+                            delay: 800,
+                            cssClass: 'success',
+                            animationSpeed: "normal"
+                        });
+                        form[0].reset();
+                    }
+                });
+            }
+        });
+        jQuery('.my-book form.author-edit').validate({
+            submitHandler: function(e){
+                let form = jQuery('.my-book form.author-edit');
+                let action = 'my_book';
+                let sub_action = 'edit_author';
+                let author_id = form.first().attr('data-author-id');
+                let data = 'action='+action+'&sub_action='+sub_action+'&'+'&author_id='+author_id+'&';
+                data += form.serialize();
+                jQuery.post(mb_ajaxurl, data, function(response){
+                    if(console_log) console.log(response);
+                    if(response.status == 1){
+                        jQuery.notifyBar({
+                            html: response.message,
+                            delay: 800,
+                            cssClass: 'success',
+                            animationSpeed: "normal",
+                            onHide: function(){
+                                window.location.href = response.data.redirect;
+                            }
+                        });
+                    }
+                });
+            }
+        });
+        jQuery('.my-book table#authors_list').on('click', '.delete-btn', function(e){
+            e.preventDefault();
+            
+            if(confirm("Are you sure to delete it?")){
+                let action = 'my_book';
+                let sub_action = 'delete_author';
+                let author_id = jQuery(this).data('id');
+                let data = 'action='+action+'&sub_action='+sub_action+'&'+'&author_id='+author_id+'&';
+                jQuery.post(mb_ajaxurl, data, function(response){
+                    if(console_log) console.log(response);
+                    if(response.status == 1){
+                        window.location.reload();
+                    }
+                });
+            }
+        });
     })();
+    
     
 } );
 
