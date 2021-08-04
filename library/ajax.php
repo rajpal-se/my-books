@@ -34,7 +34,8 @@ function add_book(){
         reply_positive(['insert_id' => $wpdb->insert_id], "Book added Successfully.");
     }
     else{
-        reply_negitive('Failed to add New Book.');
+        $redirect = admin_url('admin.php?page=book-list');
+        reply_positive(['redirect' => $redirect ], 'Failed to add New Book.');
     }
 }
 function edit_book(){
@@ -94,7 +95,8 @@ function add_author(){
     $format = ['%s', '%s', '%s'];
 
     if( $wpdb->insert($table, $data, $format) ){
-        reply_positive(['insert_id' => $wpdb->insert_id], "Author added Successfully.");
+        $redirect = admin_url('admin.php?page=list-book-authors');
+        reply_positive(['insert_id' => $wpdb->insert_id, 'redirect' => $redirect], "Author added Successfully.");
     }
     else{
         reply_negitive('Failed to add New Author.');
@@ -139,5 +141,70 @@ function delete_author(){
     }
     else{
         reply_negitive('Failed to Delete Author.');
+    }
+}
+function mb_add_user(){
+    global $wpdb;
+
+    if(!isset($_REQUEST['name'])) reply_negitive("Name field is Required.");
+    if(!isset($_REQUEST['email'])) reply_negitive("Email field is Required.");
+    if(!isset($_REQUEST['username'])) reply_negitive("Username field is Required.");
+    if(!isset($_REQUEST['password'])) reply_negitive("Password field is Required.");
+    if(!isset($_REQUEST['confirm_password'])) reply_negitive("Confirm Password field is Required.");
+    if($_REQUEST['password'] != $_REQUEST['confirm_password']) reply_negitive("Confirm Password NOT Matched.");
+    if( username_exists( $_REQUEST['username'] ) ) reply_negitive("Username already Exists.");
+    if( email_exists( $_REQUEST['email'] ) ) reply_negitive("Email already Exists.");
+    
+    if( !filter_var($_REQUEST['email'], FILTER_VALIDATE_EMAIL) ) reply_negitive("Invalid Email Address.");
+
+    $name = $_REQUEST['name'];
+    $email = $_REQUEST['email'];
+    $username = $_REQUEST['username'];
+    $password = $_REQUEST['password'];
+
+    $user_id = wp_create_user($username, $password, $email);
+    $user = new WP_User($user_id);
+    $user->set_role( MY_BOOK_PLUGIN_ROLE );
+
+    $user->data->display_name = $name;
+    $user_id = wp_update_user($user);
+
+    if( $user_id ){
+        $redirect = admin_url('admin.php?page=list-book-users');
+        reply_positive(['insert_id' => $wpdb->insert_id, 'redirect' => $redirect], "User added Successfully.");
+    }
+    else{
+        reply_negitive('Failed to add New User.');
+    }
+}
+function delete_user(){
+    global $wpdb;
+
+    if(!isset($_REQUEST['user_id'])) reply_negitive('User ID is required.');
+    
+    $id = $_REQUEST['user_id'];
+    
+    if( wp_delete_user($id) ){
+        reply_positive('', "User Deleted Successfully.");
+    }
+    else{
+        reply_negitive('Failed to Delete User.');
+    }
+}
+function enroll_in_book(){
+    global $wpdb;
+    $table = $wpdb->prefix . 'book_enrollments';
+    if(!isset($_REQUEST['book_id'])) reply_negitive("Book ID is Required.");
+
+    $data['user_id'] = get_current_user_id();
+    $data['book_id'] = $_REQUEST['book_id'];
+
+    $insert = $wpdb->insert($table, $data, ['%d', '%d']);
+    
+    if( $insert ){
+        reply_positive('', "Enrolled Successfully.");
+    }
+    else{
+        reply_negitive('Failed to Update Author.');
     }
 }

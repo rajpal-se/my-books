@@ -1,5 +1,4 @@
 jQuery(document).ready(function() {
-    let console_log = true;
     (function(){
         jQuery('.my-book table').DataTable();
     })();
@@ -17,8 +16,7 @@ jQuery(document).ready(function() {
                 jQuery('.my-book form img').attr('src', image.url);
                 jQuery('.my-book form input[name="image"]').attr('value', image.url);
             });
-        });
-        
+        });  
         // add_book_dummy_data();
         jQuery('.my-book form.book-add').validate({
             submitHandler: function(e){
@@ -57,7 +55,7 @@ jQuery(document).ready(function() {
                     if(response.status == 1){
                         jQuery.notifyBar({
                             html: response.message,
-                            delay: 1000,
+                            delay: 600,
                             cssClass: 'success',
                             animationSpeed: "normal",
                             onHide: function(){
@@ -75,7 +73,7 @@ jQuery(document).ready(function() {
                 let action = 'my_book';
                 let sub_action = 'delete_book';
                 let book_id = jQuery(this).data('id');
-                let data = 'action='+action+'&sub_action='+sub_action+'&'+'&book_id='+book_id+'&';
+                let data = 'action='+action+'&sub_action='+sub_action+'&'+'&book_id='+book_id;
                 jQuery.post(mb_ajaxurl, data, function(response){
                     if(console_log) console.log(response);
                     if(response.status == 1){
@@ -88,7 +86,60 @@ jQuery(document).ready(function() {
 
     // Users
     (function(){
-
+        jQuery('.my-book form.user-add').validate({
+            rules : {
+                username : {
+                    minlength : 5
+                },
+                password : {
+                    minlength : 5
+                },
+                confirm_password : {
+                    minlength : 5,
+                    equalTo : "#password"
+                }
+            },
+            submitHandler: function(e){
+                let form = jQuery('.my-book form.user-add');
+                let action = 'my_book';
+                let sub_action = 'mb_add_user';
+                let data = 'action='+action+'&sub_action='+sub_action+'&'+form.serialize();
+                jQuery.post(mb_ajaxurl, data, function(response){
+                    if(console_log) console.log(response);
+                    if(response.status == 1){
+                        jQuery.notifyBar({
+                            html: response.message,
+                            delay: 600,
+                            cssClass: 'success',
+                            animationSpeed: "normal",
+                            onHide: function(){
+                                window.location.href = response.data.redirect;
+                            }
+                        });
+                        form[0].reset();
+                    }
+                }).error(function(e){
+                    console.log(e);
+                });
+            }
+        });
+        jQuery('.my-book table#users').on('click', '.delete-btn', function(e){
+            e.preventDefault();
+            
+            if(confirm("Are you sure to delete it?")){
+                let action = 'my_book';
+                let sub_action = 'delete_user';
+                let user_id = jQuery(this).data('id');
+                let data = 'action='+action+'&sub_action='+sub_action+'&'+'&user_id='+user_id;
+                
+                jQuery.post(mb_ajaxurl, data, function(response){
+                    if(console_log) console.log(response);
+                    if(response.status == 1){
+                        window.location.reload();
+                    }
+                });
+            }
+        });
     })();
     
     // Authors
@@ -104,7 +155,7 @@ jQuery(document).ready(function() {
                     if(response.status == 1){
                         jQuery.notifyBar({
                             html: response.message,
-                            delay: 800,
+                            delay: 700,
                             cssClass: 'success',
                             animationSpeed: "normal"
                         });
@@ -126,7 +177,7 @@ jQuery(document).ready(function() {
                     if(response.status == 1){
                         jQuery.notifyBar({
                             html: response.message,
-                            delay: 800,
+                            delay: 600,
                             cssClass: 'success',
                             animationSpeed: "normal",
                             onHide: function(){
@@ -154,8 +205,7 @@ jQuery(document).ready(function() {
             }
         });
     })();
-    
-    
+       
 } );
 
 function add_book_dummy_data(){

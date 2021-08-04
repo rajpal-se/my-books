@@ -13,19 +13,25 @@ if(!defined('ABSPATH')) exit;
 if(!defined('MY_BOOK_PLUGIN_DIR_PATH')) define('MY_BOOK_PLUGIN_DIR_PATH', plugin_dir_path( __FILE__ ) );
 if(!defined('MY_BOOK_PLUGIN_URL')) define('MY_BOOK_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
 
+if(!defined('MY_BOOK_PLUGIN_ROLE')) define('MY_BOOK_PLUGIN_ROLE', 'my-book-reader' );
+if(!defined('MY_BOOK_PLUGIN_CUSTOM_PAGE')) define('MY_BOOK_PLUGIN_CUSTOM_PAGE', 'mb-books' );
+if(!defined('MY_BOOK_PLUGIN_SHORTCODE')) define('MY_BOOK_PLUGIN_SHORTCODE', 'mb-books' );
+if(!defined('MY_BOOK_PLUGIN_OPT_CUSTOM_PAGE')) define('MY_BOOK_PLUGIN_OPT_CUSTOM_PAGE', 'mb-books-custom-page-id' );
+if(!defined('MY_BOOK_PLUGIN_JS_CONSOLE')) define('MY_BOOK_PLUGIN_JS_CONSOLE', true );
+
 function my_book_file_url($x){ return MY_BOOK_PLUGIN_URL.$x; }
 
 function my_book_prefix($x){  return 'my_book_'.$x; }
 
+function add_style($name, $url){
+    wp_enqueue_style( my_book_prefix( $name ) , MY_BOOK_PLUGIN_URL.$url );
+}
+function add_script($name, $url){
+    wp_enqueue_script( my_book_prefix( $name ) , MY_BOOK_PLUGIN_URL.$url, '', false, true);
+}
+
 add_action('admin_enqueue_scripts', function(){
-    function add_style($name, $url){
-        wp_enqueue_style( my_book_prefix( $name ) , MY_BOOK_PLUGIN_URL.$url );
-    }
-
-    function add_script($name, $url){
-        wp_enqueue_script( my_book_prefix( $name ) , MY_BOOK_PLUGIN_URL.$url, '', false, true);
-    }
-
+    
     if(isset($_GET['page'])){
         $pages =['book-list', 'add-new-book', 'edit-book', 'view-book'];
         array_push($pages, 'add-book-user', 'edit-book-user', 'list-book-users');
@@ -53,9 +59,27 @@ add_action('admin_enqueue_scripts', function(){
             // Custom Files
             add_style('custom-css', 'assets/css/style.css');
             add_script('custom-js', 'assets/js/script.js');
-
+            
+            wp_localize_script(my_book_prefix('custom-js'), 'console_log', strval(MY_BOOK_PLUGIN_JS_CONSOLE));
             wp_localize_script(my_book_prefix('custom-js'), 'mb_ajaxurl', admin_url('admin-ajax.php'));
         }
+    }
+});
+
+add_action('wp_enqueue_scripts', function(){
+    if(strstr($_SERVER['REQUEST_URI'], '/mb-books')){
+        // jQuery
+        wp_enqueue_script('jquery');
+        
+        // BootStrap
+        add_style('bootstrap', 'assets/libs/bootstrap-5.0.2-dist/css/bootstrap.min.css');
+        add_script('bootstrap', 'assets/libs/bootstrap-5.0.2-dist/js/bootstrap.min.js');
+        
+        // Custom Files
+        add_script('custom-js-fe', 'assets/js/script-fe.js');
+        
+        wp_localize_script(my_book_prefix('custom-js-fe'), 'console_log', strval(MY_BOOK_PLUGIN_JS_CONSOLE));
+        wp_localize_script(my_book_prefix('custom-js-fe'), 'mb_ajaxurl', admin_url('admin-ajax.php'));
     }
 });
 
@@ -97,15 +121,6 @@ function preview_book_author_handler() { require_once MY_BOOK_PLUGIN_DIR_PATH . 
 function users_enrollment_handler() { require_once MY_BOOK_PLUGIN_DIR_PATH . 'views/list-enrollments.php'; }
 
 
-register_activation_hook( __FILE__, 'my_book_activation_handler');
-
-function my_book_activation_handler(){
-    // Create Table
-    require_once ABSPATH . 'wp-admin/includes/upgrade.php';
-    $tables = get_my_book_table_info();
-    foreach($tables as $v) dbDelta($v);
-}
-
 function get_my_book_table_info($names = false, $prefixed = false){
     global $wpdb;
 
@@ -122,18 +137,6 @@ function get_my_book_table_info($names = false, $prefixed = false){
             ) ENGINE = InnoDB;
     ';
 
-    $table = 'book_users';
-    $sql[$table] = '
-            CREATE TABLE `'. $wpdb->dbname .'`.`'. $wpdb->prefix . $table .'` (
-                `id` INT NOT NULL AUTO_INCREMENT ,
-                `name` VARCHAR(100) NOT NULL ,
-                `email` VARCHAR(100) NOT NULL ,
-                `wp_users_id` INT NOT NULL ,
-                `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ,
-                PRIMARY KEY (`id`)
-            ) ENGINE = InnoDB;
-    ';
-
     $table = 'book_authors';
     $sql[$table] = '
             CREATE TABLE `'. $wpdb->dbname .'`.`'. $wpdb->prefix . $table .'` (
@@ -146,7 +149,7 @@ function get_my_book_table_info($names = false, $prefixed = false){
             ) ENGINE = InnoDB;
     ';
 
-    $table = 'book_enrollment';
+    $table = 'book_enrollments';
     $sql[$table] = '
             CREATE TABLE `'. $wpdb->dbname .'`.`'. $wpdb->prefix . $table .'` (
                 `id` INT NOT NULL AUTO_INCREMENT ,
@@ -170,16 +173,106 @@ function get_my_book_table_info($names = false, $prefixed = false){
     return $sql;
 }
 
-register_deactivation_hook( __FILE__, 'my_book_uninstall_handler');
-register_uninstall_hook( __FILE__, 'my_book_uninstall_handler');
+register_activation_hook( __FILE__, 'my_book_activation_handler');
+function my_book_activation_handler(){
+    // Create Table
+    require_once ABSPATH . 'wp-admin/includes/upgrade.php';
+    $tables = get_my_book_table_info();
+    foreach($tables as $v) dbDelta($v);
 
+    add_role(MY_BOOK_PLUGIN_ROLE, 'My Book Reader', ['read' => true]);
+
+    $post = get_post( wp_insert_post([
+        'post_name' => MY_BOOK_PLUGIN_CUSTOM_PAGE,
+        'post_title' => 'All Books',
+        'post_content' => '['.MY_BOOK_PLUGIN_SHORTCODE.'][/'.MY_BOOK_PLUGIN_SHORTCODE.']',
+        'post_type' => 'page',
+        'post_status' => 'publish'
+    ]) );
+    
+    update_option(MY_BOOK_PLUGIN_OPT_CUSTOM_PAGE, $post->ID);
+}
+register_deactivation_hook( __FILE__, 'my_book_deactivation_handler');
+function my_book_deactivation_handler(){
+        // Drop Table
+        my_book_uninstall_handler();
+
+        if(get_role( MY_BOOK_PLUGIN_ROLE )) remove_role( MY_BOOK_PLUGIN_ROLE );
+}
+register_uninstall_hook( __FILE__, 'my_book_uninstall_handler');
 function my_book_uninstall_handler(){
     // Drop Table
     global $wpdb;
     $table_names = get_my_book_table_info(true, true);
     foreach($table_names as $v) $wpdb->query('DROP TABLE IF EXISTS '. $v );
+
+    $id = get_option(MY_BOOK_PLUGIN_OPT_CUSTOM_PAGE);
+    if($id){
+        wp_delete_post($id, true);
+        delete_option(MY_BOOK_PLUGIN_OPT_CUSTOM_PAGE);
+    }
 }
 
 add_action('wp_ajax_my_book', function(){
     require_once MY_BOOK_PLUGIN_DIR_PATH . 'library/ajax.php';
 });
+
+function get_field($field, $length = 22){
+    $data = htmlentities(stripslashes($field));
+    if($length == false) return $data;
+    if(strlen($data) > $length) $data = substr($data, 0, $length) . '...';
+    return $data;
+}
+
+add_action('profile_update', function($user_id, $user_old_data, $user_data){
+    $text = 'redirect_to=' . MY_BOOK_PLUGIN_ROLE;
+    if( strstr(wp_get_raw_referer() , $text)){
+        wp_redirect( admin_url('admin.php?page=list-book-users'), 301 );
+        exit;
+    }
+}, 10, 3);
+
+add_action('init', function(){
+    add_shortcode(MY_BOOK_PLUGIN_SHORTCODE, 'my_plugin_shortcode_handler');
+
+    add_rewrite_rule( MY_BOOK_PLUGIN_CUSTOM_PAGE . '/([0-9]+)[/]?$', 'index.php?read_book_id=$matches[1]', 'top' );
+});
+add_filter( 'query_vars', function( $query_vars ) {
+    $query_vars[] = 'read_book_id';
+    return $query_vars;
+} );
+add_action( 'template_include', function( $template ) {
+    if ( get_query_var( 'read_book_id' ) == false || get_query_var( 'read_book_id' ) == '' ) {
+        return $template;
+    }
+    return MY_BOOK_PLUGIN_DIR_PATH . 'views/custom-page-read-book.php';
+} );
+
+function my_plugin_shortcode_handler($atts, $content = ''){
+    $attributes = shortcode_atts( array(), $atts );
+     
+    ob_start();
+    echo "Working Fine.";
+    // include template with the arguments (The $args parameter was added in v5.5.0)
+    // get_template_part( 'template-parts/wpdocs-the-shortcode-template', null, $attributes );
+ 
+    return ob_get_clean();
+}
+
+add_action('wp_login', 'redirect_to_my_page');
+add_action('wp_logout', 'redirect_to_my_page');
+
+function redirect_to_my_page(){
+    $custom_page_id = get_option(MY_BOOK_PLUGIN_OPT_CUSTOM_PAGE, 0);
+    if( $custom_page_id ){
+        $link = get_permalink($custom_page_id);
+        wp_redirect($link, 301);
+        exit();
+    }
+}
+
+add_filter('page_template', function($template, $type, $templates){
+    if(in_array('page-'. MY_BOOK_PLUGIN_CUSTOM_PAGE . '.php', $templates)){
+        return MY_BOOK_PLUGIN_DIR_PATH . 'views/custom-page.php';
+    }
+}, 10, 3);
